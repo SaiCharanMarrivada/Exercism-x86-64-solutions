@@ -14,7 +14,7 @@ void tearDown(void) {
 
 void test_empty_rna_sequence(void) {
     char buffer[BUFFER_SIZE];
-
+    // TEST_IGNORE();
     to_rna("", buffer);
     TEST_ASSERT_EQUAL_STRING("", buffer);
 }

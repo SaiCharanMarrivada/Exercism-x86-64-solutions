@@ -2,26 +2,27 @@ default rel
 
 section .rodata
 dna_to_rna:
-    db 'U', '0', 'G', '0', '0', '0', 'C', '0', '0', '0', '0', '0', '0',
-    db '0', '0', '0', '0', '0', '0', 'A', '0', '0', '0', '0', '0', '0'
+    db 'U', 'A', 'G', 'A', 'A', 'A', 'C', 'A', 'A', 'A', 'A', 'A', 'A',
+    db 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A',
+    db 'A', 'A', 'A', 'A', 'A', 'A'
+
+A: db (256 - 'A')
 
 section .text
 global to_rna
 to_rna:
-    xor ecx, ecx
     xor eax, eax
-    lea rdx, [dna_to_rna]
+    vpbroadcastb ymm0, [A]
+    vmovdqu ymm1, [dna_to_rna]
 rna:
-    mov al, byte [rdi + rcx]
-    sub al, 'A'
-    js _end
-    mov al, byte [rax + rdx]
-    mov byte [rsi + rcx], al
-    inc rcx
-    jmp rna
-
-_end:
-    mov byte [rsi + rcx], 0 ; null terminate it
+    vpaddb ymm2, ymm0, [rdi + rax]
+    vpshufb ymm2, ymm1, ymm2
+    vmovdqu [rsi + rax], ymm2
+    vpmovmskb ecx, ymm2
+    add rax, 32
+    test ecx, ecx
+    jne rna
+    vzeroupper
     ret
 
 %ifidn __OUTPUT_FORMAT__,elf64
